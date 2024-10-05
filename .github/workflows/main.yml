@@ -1,4 +1,4 @@
-name: Build and Run Jefo App on Windows
+name: Build and Package Jefo App on Windows
 
 on:
   push:
@@ -18,13 +18,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Set up Python environment
-      - name: Setup Python 3.8
+      # Setup Python 3.10
+      - name: Setup Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: '3.8'
+          python-version: '3.10'
 
-      # Install dependencies (Torch, OpenCV, Pillow, tkinter, etc.)
+      # Install dependencies (Torch, OpenCV, Pillow, Tkinter, etc.)
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
@@ -36,12 +36,29 @@ jobs:
         run: |
           python -m pip install tk
 
-      # Run the application (Optional: You can replace this with your main script)
-      - name: Run Jefo App
+      # Create a directory to store dependencies
+      - name: Create Dist Directory
         run: |
-          python jefo.py  # Replace with your entry-point script (e.g., jefo_app.py or captcha_solver.py)
+          mkdir dist
 
-      # Run tests (Optional: if you have unit tests)
-      - name: Run Tests
+      # Freeze dependencies into requirements.txt
+      - name: Freeze Requirements
         run: |
-          pytest tests/  # Replace with the path to your test directory if any
+          pip freeze > requirements.txt
+
+      # Copy all project files to the dist folder
+      - name: Copy Project Files
+        run: |
+          xcopy /s /i . dist
+
+      # Zip the project folder including all dependencies and files
+      - name: Zip Project
+        run: |
+          powershell Compress-Archive -Path dist/* -DestinationPath jefo_app.zip
+
+      # Upload the artifact (zipped project)
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: jefo-app
+          path: jefo_app.zip
