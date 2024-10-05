@@ -46,10 +46,10 @@ jobs:
         run: |
           pip freeze > requirements.txt
 
-      # Copy all project files to the dist folder
+      # Copy all project files to the dist folder, excluding the dist folder itself
       - name: Copy Project Files
         run: |
-          xcopy /s /i . dist
+          robocopy . dist /MIR /XD dist
 
       # Zip the project folder including all dependencies and files
       - name: Zip Project
